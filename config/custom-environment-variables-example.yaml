@@ -8,7 +8,10 @@ authentication:
   password: 'PASSWD'
 
 dataSources:
-  oracledb:
-    connectString: 'DB_URL'
-    user: 'DB_USER'
-    password: 'DB_PASSWD'
+  http:
+    baseUri: 'DOCUSIGN_API_BASEURI'
+    headers:
+      X-DocuSign-Authentication:
+        Username: 'DOCUSIGN_USERNAME'
+        Password: 'DOCUSIGN_PASSWORD'
+        IntegratorKey: 'DOCUSIGN_INTEGRATOR_KEY'
