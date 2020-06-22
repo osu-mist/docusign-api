@@ -1,14 +1,14 @@
 {
-  "name": "express-api-skeleton",
+  "name": "docusign-api",
   "version": "1.0.0",
-  "description": "Skeleton for Express APIs.",
-  "homepage": "https://github.com/osu-mist/express-api-skeleton#readme",
+  "description": "Wrapper API for DocuSign.",
+  "homepage": "https://github.com/osu-mist/docusign-api#readme",
   "bugs": {
-    "url": "https://github.com/osu-mist/express-api-skeleton/issues"
+    "url": "https://github.com/osu-mist/docusign-api/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/osu-mist/express-api-skeleton.git"
+    "url": "git+https://github.com/osu-mist/docusign-api.git"
   },
   "license": "AGPL-3.0",
   "author": "osu-mist",
