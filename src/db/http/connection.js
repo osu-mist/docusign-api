@@ -3,10 +3,23 @@ import rp from 'request-promise-native';
 
 import { logger } from 'utils/logger';
 
-const { baseUri, headers } = config.get('dataSources.http');
+const {
+  baseUri,
+  username,
+  password,
+  integratorKey,
+} = config.get('dataSources.http');
 
 const httpOptions = {
-  headers,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'X-DocuSign-Authentication': JSON.stringify({
+      Username: username,
+      Password: password,
+      IntegratorKey: integratorKey,
+    }),
+  },
   json: true,
 };
 
@@ -17,7 +30,7 @@ const httpOptions = {
  */
 const validateHttp = async () => {
   try {
-    await rp.head({ ...{ uri: baseUri }, ...httpOptions });
+    await rp.get({ ...{ uri: baseUri }, ...httpOptions });
   } catch (err) {
     logger.error(err);
     throw new Error('Unable to connect to HTTP data source');

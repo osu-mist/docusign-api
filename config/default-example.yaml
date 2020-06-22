@@ -16,10 +16,6 @@ dataSources:
   dataSources: [http']
   http:
     baseUri: ${DOCUSIGN_API_BASEURI}
-    headers:
-      Accept: application/json
-      Content-Type: application/json
-      X-DocuSign-Authentication:
-        Username: ${DOCUSIGN_USERNAME}
-        Password: ${DOCUSIGN_PASSWORD}
-        IntegratorKey: ${DOCUSIGN_INTEGRATOR_KEY}
+    username: ${DOCUSIGN_USERNAME}
+    password: ${DOCUSIGN_PASSWORD}
+    integratorKey: ${DOCUSIGN_INTEGRATOR_KEY}

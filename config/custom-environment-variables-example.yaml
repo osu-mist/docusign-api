@@ -10,8 +10,6 @@ authentication:
 dataSources:
   http:
     baseUri: 'DOCUSIGN_API_BASEURI'
-    headers:
-      X-DocuSign-Authentication:
-        Username: 'DOCUSIGN_USERNAME'
-        Password: 'DOCUSIGN_PASSWORD'
-        IntegratorKey: 'DOCUSIGN_INTEGRATOR_KEY'
+    username: 'DOCUSIGN_USERNAME'
+    password: 'DOCUSIGN_PASSWORD'
+    integratorKey: 'DOCUSIGN_INTEGRATOR_KEY'
