@@ -74,7 +74,7 @@ paths:
                 - signHere
                 - smartSection
                 - ssn
-                - tabGroup
+                - tabGroups
                 - text
                 - title
                 - view

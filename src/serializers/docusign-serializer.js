@@ -8,8 +8,8 @@ import { apiBaseUrl, resourcePathLink, paramsLink } from 'utils/uri-builder';
 const tabResourceProp = openapi.components.schemas.TabResource.properties;
 const tabResourceType = tabResourceProp.type.enum[0];
 const tabResourceKeys = _.keys(tabResourceProp.attributes.properties);
-const tabResourcePath = 'pets';
-const tabResourceUrl = resourcePathLink(apiBaseUrl, tabResourcePath);
+const tabResourcePath = 'tabs';
+const envelopeResourceUrl = resourcePathLink(apiBaseUrl, 'docusign/envelopes');
 
 /**
  * Convert string value to boolean
@@ -31,11 +31,17 @@ const toBoolean = (string) => {
  * Serialize tabResources to JSON API
  *
  * @param {object[]} rawTabs Raw data rows from data source
- * @param {object} parsedQuery Parsed query object
+ * @param {object} params Request params object
+ * @param {object} query Request query object
  * @returns {object} Serialized tabResource object
  */
-const serializeTabs = (rawTabs, parsedQuery) => {
-  const topLevelSelfLink = paramsLink(tabResourceUrl, parsedQuery);
+const serializeTabs = (rawTabs, params, query) => {
+  const { envelopeId, documentId } = params;
+  const tabResourceUrl = resourcePathLink(
+    envelopeResourceUrl,
+    `${envelopeId}/documents/${documentId}/${tabResourcePath}`,
+  );
+  const topLevelSelfLink = paramsLink(tabResourceUrl, query);
   const flattenTabs = [];
 
   _.forEach(rawTabs, (tabs, tabType) => {
@@ -46,7 +52,7 @@ const serializeTabs = (rawTabs, parsedQuery) => {
         label: tab.tabLabel,
         scope: tab.tabScope,
         stampType: tab.stampType,
-        tabType,
+        tabType: _.replace(tabType, /Tabs$/, ''),
         value: tab.value,
         originalValue: tab.originalValue,
         scaleValue: parseFloat(tab.scaleValue),
@@ -137,7 +143,7 @@ const serializeTabs = (rawTabs, parsedQuery) => {
     resourceKeys: tabResourceKeys,
     resourcePath: tabResourcePath,
     topLevelSelfLink,
-    parsedQuery,
+    query,
     enableDataLinks: false,
   };
 
