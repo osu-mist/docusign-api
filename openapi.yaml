@@ -12,14 +12,14 @@ info:
     email: isdataarchitecture@oregonstate.edu
 externalDocs:
   description: GitHub Repository
-  url: https://github.com/osu-mist/express-api-skeleton
+  url: https://github.com/osu-mist/docusign-api
 servers:
   - url: https://api.oregonstate.edu/v1
 security:
   - OAuth2:
       - full
 paths:
-  /envelopes/{envelopeId}/documents/{documentId}/tabs:
+  /docusign/envelopes/{envelopeId}/documents/{documentId}/tabs:
     get:
       summary: Returns the tabs on a document
       tags:
