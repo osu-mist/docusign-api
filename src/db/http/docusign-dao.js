@@ -2,6 +2,8 @@ import createError from 'http-errors';
 import config from 'config';
 import rp from 'request-promise-native';
 
+import { serializeTabs } from 'serializers/docusign-serializer';
+import { parseQuery } from 'utils/parse-query';
 import { httpOptions } from './connection';
 
 const { baseUri } = config.get('dataSources.http');
@@ -9,11 +11,13 @@ const { baseUri } = config.get('dataSources.http');
 /**
  * Return a list of pets
  *
- * @param {object} params request parameter object
+ * @param {object} params Request parameter object
+ * @param {object} query Request query object
  * @returns {Promise} Promise object represents a list of pets
  */
-const getEnvelopeDocumentTabs = async (params) => {
+const getEnvelopeDocumentTabs = async (params, query) => {
   const { envelopeId, documentId } = params;
+  const parsedQuery = parseQuery(query);
 
   let rawTabs;
   try {
@@ -21,9 +25,11 @@ const getEnvelopeDocumentTabs = async (params) => {
       ...{ uri: `${baseUri}/envelopes/${envelopeId}/documents/${documentId}/tabs` },
       ...httpOptions,
     });
+    return serializeTabs(rawTabs, parsedQuery);
   } catch (err) {
-    const { statusCode, error: { errorCode, message } } = err;
+    const { statusCode } = err;
     if (statusCode === 400) {
+      const { error: { errorCode, message } } = err;
       if (errorCode === 'INVALID_DOCUMENT_ID') {
         throw createError(404, 'documentId not found.');
       } else if (
@@ -33,8 +39,8 @@ const getEnvelopeDocumentTabs = async (params) => {
         throw createError(404, 'envelopeId not found.');
       }
     }
+    throw new Error('Unexpected internal error.');
   }
-  return rawTabs;
 };
 
 export { getEnvelopeDocumentTabs };

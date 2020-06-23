@@ -10,8 +10,7 @@ const get = async (req, res) => {
   try {
     const { params, query } = req;
 
-    const rawTabs = await getEnvelopeDocumentTabs(params, query);
-    const result = rawTabs;
+    const result = await getEnvelopeDocumentTabs(params, query);
     return res.send(result);
   } catch (err) {
     const { statusCode, message } = err;

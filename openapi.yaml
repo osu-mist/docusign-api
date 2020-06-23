@@ -87,7 +87,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnvelopeDocumentTabSetResult'
+                $ref: '#/components/schemas/TabSetResult'
         '400':
           $ref: '#/components/responses/404'
         '404':
@@ -144,7 +144,7 @@ components:
           type: string
           format: uri
           description: Self-link of current resource
-    EnvelopeDocumentTabResource:
+    TabResource:
       properties:
         id: &tabId
           type: string
@@ -372,18 +372,20 @@ components:
                     populated, or signed. This property is used for validation.
                   example: 1
             radios:
-              type: object
+              type: array
               nullable: true
               description: >-
                 Specifies the locations and status for radio buttons that are grouped together
-              properties:
-                tabId: *tabId
-                pageNumber: *pageNumber
-                position: *position
-                selectedInd: *selectedInd
-                value: *value
-                signer: *signer
-    EnvelopeDocumentTabSetResult:
+              items:
+                type: object
+                properties:
+                  tabId: *tabId
+                  pageNumber: *pageNumber
+                  position: *position
+                  selectedInd: *selectedInd
+                  value: *value
+                  signer: *signer
+    TabSetResult:
       properties:
         links:
           allOf:
@@ -391,7 +393,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/EnvelopeDocumentTabResource'
+            $ref: '#/components/schemas/TabResource'
     ErrorObject:
       properties:
         status:
