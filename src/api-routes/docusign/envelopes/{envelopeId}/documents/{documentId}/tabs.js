@@ -1,5 +1,5 @@
 import { getEnvelopeDocumentTabs } from 'db/http/docusign-dao';
-import { errorHandler } from 'errors/errors';
+import { errorBuilder, errorHandler } from 'errors/errors';
 
 /**
  * Returns the tabs on a document
@@ -8,14 +8,16 @@ import { errorHandler } from 'errors/errors';
  */
 const get = async (req, res) => {
   try {
-    const rawTabs = await getEnvelopeDocumentTabs(req.query);
+    const { params, query } = req;
 
-    console.log(rawTabs);
-
-    const result = null;
-
+    const rawTabs = await getEnvelopeDocumentTabs(params, query);
+    const result = rawTabs;
     return res.send(result);
   } catch (err) {
+    const { statusCode, message } = err;
+    if (statusCode) {
+      return errorBuilder(res, statusCode, message);
+    }
     return errorHandler(res, err);
   }
 };

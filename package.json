@@ -38,6 +38,7 @@
     "express-basic-auth": "^1.2.0",
     "express-openapi": "^6.0.0",
     "express-winston": "^4.0.3",
+    "http-errors": "^1.7.3",
     "js-yaml": "^3.14.0",
     "jsonapi-serializer": "^3.6.6",
     "lodash": "^4.17.15",
