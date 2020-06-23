@@ -12,6 +12,22 @@ const tabResourcePath = 'pets';
 const tabResourceUrl = resourcePathLink(apiBaseUrl, tabResourcePath);
 
 /**
+ * Convert string value to boolean
+ *
+ * @param {string} string string to be parsed
+ * @returns {boolean} Parsed boolean value
+ */
+const toBoolean = (string) => {
+  if (string === 'true') {
+    return true;
+  }
+  if (string === 'false') {
+    return false;
+  }
+  return null;
+};
+
+/**
  * Serialize tabResources to JSON API
  *
  * @param {object[]} rawTabs Raw data rows from data source
@@ -33,26 +49,26 @@ const serializeTabs = (rawTabs, parsedQuery) => {
         tabType,
         value: tab.value,
         originalValue: tab.originalValue,
-        scaleValue: tab.scaleValue,
-        pageNumber: tab.pageNumber,
-        optionalInd: tab.optional,
+        scaleValue: parseFloat(tab.scaleValue),
+        pageNumber: parseInt(tab.pageNumber, 10),
+        optionalInd: toBoolean(tab.optional),
         recipientId: tab.recipientId,
         position: {
-          x: tab.xPosition,
-          y: tab.yPosition,
+          x: parseInt(tab.xPosition, 10),
+          y: parseInt(tab.yPosition, 10),
         },
         templateRecipient: {
-          lockedInd: tab.templateLocked,
-          requiredInd: tab.templateRequired,
+          lockedInd: toBoolean(tab.templateLocked),
+          requiredInd: toBoolean(tab.templateRequired),
         },
         signer: {
-          lockedInd: tab.locked,
-          requiredInd: tab.required,
+          lockedInd: toBoolean(tab.locked),
+          requiredInd: toBoolean(tab.required),
         },
         shared: {
-          sharedInd: tab.shared,
-          requireAllInd: tab.requireAll,
-          requireInitialOnSharedChangeInd: tab.requireInitialOnSharedChange,
+          sharedInd: toBoolean(tab.shared),
+          requireAllInd: toBoolean(tab.requireAll),
+          requireInitialOnSharedChangeInd: toBoolean(tab.requireInitialOnSharedChange),
         },
         font: {
           family: tab.font,
@@ -60,24 +76,24 @@ const serializeTabs = (rawTabs, parsedQuery) => {
           color: tab.fontColor,
         },
         size: {
-          height: tab.height,
-          width: tab.width,
-          maxLength: tab.maxLength,
+          height: parseInt(tab.height, 10),
+          width: parseInt(tab.width, 10),
+          maxLength: parseInt(tab.maxLength, 10),
         },
         validation: {
           pattern: tab.validationPattern,
           message: tab.validationMessage,
         },
-        concealValueOnDocumentInd: tab.concealValueOnDocument,
-        disableAutoSizeInd: tab.disableAutoSize,
-        selectedInd: tab.selected,
+        concealValueOnDocumentInd: toBoolean(tab.concealValueOnDocument),
+        disableAutoSizeInd: toBoolean(tab.disableAutoSize),
+        selectedInd: toBoolean(tab.selected),
         tabGroupLabels: tab.tabGroupLabels,
         group: {
           name: tab.groupName,
           label: tab.groupLabel,
           rule: tab.groupRule,
-          minimumRequired: tab.minimumRequired,
-          maximumAllowed: tab.maximumAllowed,
+          minimumRequired: parseInt(tab.minimumRequired, 10),
+          maximumAllowed: parseInt(tab.maximumAllowed, 10),
         },
         radios: [],
       };
@@ -86,16 +102,16 @@ const serializeTabs = (rawTabs, parsedQuery) => {
         _.forEach(tab.radios, (rawRadio) => {
           const radio = {
             tabId: rawRadio.tabId,
-            pageNumber: rawRadio.pageNumber,
+            pageNumber: parseInt(rawRadio.pageNumber, 10),
             position: {
-              x: rawRadio.xPosition,
-              y: rawRadio.yPosition,
+              x: parseInt(rawRadio.xPosition, 10),
+              y: parseInt(rawRadio.yPosition, 10),
             },
-            selectedInd: rawRadio.selected,
+            selectedInd: toBoolean(rawRadio.selected),
             value: rawRadio.value,
             signer: {
-              lockedInd: rawRadio.locked,
-              requiredInd: rawRadio.required,
+              lockedInd: toBoolean(rawRadio.locked),
+              requiredInd: toBoolean(rawRadio.required),
             },
           };
           flattenTab.radios.push(radio);
