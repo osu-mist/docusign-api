@@ -95,26 +95,22 @@ const serializeTabs = (rawTabs, parsedQuery) => {
           minimumRequired: parseInt(tab.minimumRequired, 10),
           maximumAllowed: parseInt(tab.maximumAllowed, 10),
         },
-        radios: [],
       };
 
       if (tabType === 'radioGroupTabs') {
         _.forEach(tab.radios, (rawRadio) => {
-          const radio = {
-            tabId: rawRadio.tabId,
-            pageNumber: parseInt(rawRadio.pageNumber, 10),
-            position: {
-              x: parseInt(rawRadio.xPosition, 10),
-              y: parseInt(rawRadio.yPosition, 10),
-            },
-            selectedInd: toBoolean(rawRadio.selected),
-            value: rawRadio.value,
-            signer: {
-              lockedInd: toBoolean(rawRadio.locked),
-              requiredInd: toBoolean(rawRadio.required),
-            },
+          flattenTab.tabId = rawRadio.tabId;
+          flattenTab.pageNumber = parseInt(rawRadio.pageNumber, 10);
+          flattenTab.position = {
+            x: parseInt(rawRadio.xPosition, 10),
+            y: parseInt(rawRadio.yPosition, 10),
           };
-          flattenTab.radios.push(radio);
+          flattenTab.selectedInd = toBoolean(rawRadio.selected);
+          flattenTab.value = rawRadio.value;
+          flattenTab.signer = {
+            lockedInd: toBoolean(rawRadio.locked),
+            requiredInd: toBoolean(rawRadio.required),
+          };
         });
       }
 
