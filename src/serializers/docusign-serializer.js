@@ -3,6 +3,7 @@ import _ from 'lodash';
 
 import { serializerOptions } from 'utils/jsonapi';
 import { openapi } from 'utils/load-openapi';
+import { parseQuery } from 'utils/parse-query';
 import { apiBaseUrl, resourcePathLink, paramsLink } from 'utils/uri-builder';
 
 const tabResourceProp = openapi.components.schemas.TabResource.properties;
@@ -37,12 +38,13 @@ const toBoolean = (string) => {
  */
 const serializeTabs = (rawTabs, params, query) => {
   const { envelopeId, documentId } = params;
+  const { pageNumber } = parseQuery(query);
   const tabResourceUrl = resourcePathLink(
     envelopeResourceUrl,
     `${envelopeId}/documents/${documentId}/${tabResourcePath}`,
   );
   const topLevelSelfLink = paramsLink(tabResourceUrl, query);
-  const flattenTabs = [];
+  let flattenTabs = [];
 
   _.forEach(rawTabs, (tabs, tabType) => {
     _.forEach(tabs, (tab) => {
@@ -156,6 +158,10 @@ const serializeTabs = (rawTabs, params, query) => {
       flattenTabs.push(flattenTab);
     });
   });
+
+  if (pageNumber) {
+    flattenTabs = _.filter(flattenTabs, (tab) => _.includes(pageNumber, tab.pageNumber));
+  }
 
   const serializerArgs = {
     identifierField: 'tabId',
