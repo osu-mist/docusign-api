@@ -74,7 +74,7 @@ paths:
                 - signHere
                 - smartSection
                 - ssn
-                - tabGroup
+                - tabGroups
                 - text
                 - title
                 - view
@@ -146,7 +146,7 @@ components:
           description: Self-link of current resource
     TabResource:
       properties:
-        id: &tabId
+        id:
           type: string
           description: A unique ID of tab
           example: abcd-0000-12345-ABCDE
@@ -182,7 +182,7 @@ components:
               description: The type of tab
               enum: *tabTypeEnums
               nullable: false
-            value: &value
+            value:
               type: string
               description: The value of the tab
               example: Approve
@@ -198,7 +198,7 @@ components:
               description: Scale value of the tab
               example: 1.2
               nullable: true
-            pageNumber: &pageNumber
+            pageNumber:
               type: number
               format: integer
               description: The page number that this tab occurs
@@ -213,7 +213,7 @@ components:
               description: Unique ID of the recipient
               example: xyz-123-OPQRSTU
               nullable: false
-            position: &position
+            position:
               type: object
               nullable: false
               properties:
@@ -238,7 +238,7 @@ components:
                 requiredInd:
                   type: boolean
                   description: When set to true, the sender may not remove the recipient
-            signer: &signer
+            signer:
               type: object
               nullable: true
               properties:
@@ -328,7 +328,7 @@ components:
                 When set to true, disables the auto sizing of single line text boxes in the signing
                 screen when the signer enters data. If disabled users will only be able enter as
                 much data as the text box can hold.
-            selectedInd: &selectedInd
+            selectedInd:
               type: boolean
               nullable: true
               description: >-
@@ -371,20 +371,68 @@ components:
                     The maximum number of tabs within the `tabGroup` that should be checked,
                     populated, or signed. This property is used for validation.
                   example: 1
-            radios:
-              type: array
+            conditionalParent:
+              type: object
+              nullable: true
+              properties:
+                label:
+                  type: string
+                  description: The label of the parent tab that controls this tab's visibility.
+                  example: Radio Group 0000-aaaa-1234567
+                value:
+                  type: string
+                  description: >-
+                    The value of the parent tab that controls the tab's visibility. If the parent
+                    tab is a Checkbox, Radio button, Optional Signature, or Optional Initial use
+                    `on` as the value to show that the parent tab is active.
+                  example: Radio1
+            order:
+              type: number
+              format: integer
               nullable: true
               description: >-
-                Specifies the locations and status for radio buttons that are grouped together
+                A positive integer that sets the order the tab is navigated to during signing.
+              example: 0
+            listItems:
+              type: array
+              nullable: true
               items:
                 type: object
                 properties:
-                  tabId: *tabId
-                  pageNumber: *pageNumber
-                  position: *position
-                  selectedInd: *selectedInd
-                  value: *value
-                  signer: *signer
+                  text:
+                    type: string
+                    description: Specifies the text that is shown in the dropdown list.
+                    example: AABC
+                  value:
+                    type: string
+                    description: Specifies the value that is used when the list item is selected.
+                    example: AABC
+                  selectedInd:
+                    type: boolean
+                    description: >-
+                      When set to true, indicates that this item is the default selection shown to
+                      a signer.
+            formula:
+              type: string
+              nullable: true
+              description: Contains the formula for calculating the value of this tab.
+              example: "[Mother Siblings] + [Father Siblings] = [Dropdown xxx-123-ABC]"
+            roundDecimalPlaces:
+              type: number
+              format: integer
+              nullable: true
+              description: The number of decimal places to round to.
+              example: 1
+            hiddenInd:
+              type: boolean
+              nullable: true
+              description: |
+                If this is a regular formula (no paymentDetails property is present):
+                  true: The tab is hidden.
+                  false: The tab is shown.
+                If the formula is payment item (a paymentDetails property is present):
+                  true: The tab is displayed as a payment.
+                  false: The tab is displayed as a regular formula.
     TabSetResult:
       properties:
         links:
