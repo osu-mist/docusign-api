@@ -38,7 +38,7 @@ const toBoolean = (string) => {
  */
 const serializeTabs = (rawTabs, params, query) => {
   const { envelopeId, documentId } = params;
-  const { pageNumber } = parseQuery(query);
+  const { tabTypes } = parseQuery(query);
   const tabResourceUrl = resourcePathLink(
     envelopeResourceUrl,
     `${envelopeId}/documents/${documentId}/${tabResourcePath}`,
@@ -159,8 +159,8 @@ const serializeTabs = (rawTabs, params, query) => {
     });
   });
 
-  if (pageNumber) {
-    flattenTabs = _.filter(flattenTabs, (tab) => _.includes(pageNumber, tab.pageNumber));
+  if (tabTypes) {
+    flattenTabs = _.filter(flattenTabs, (flattenTab) => _.includes(tabTypes, flattenTab.tabType));
   }
 
   const serializerArgs = {

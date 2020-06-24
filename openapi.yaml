@@ -29,7 +29,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/envelopeId'
         - $ref: '#/components/parameters/documentId'
-        - name: filter[pageNumber]
+        - name: filter[pageNumbers]
           in: query
           required: false
           description: Filters for tabs that occur on the specified page number
@@ -39,7 +39,7 @@ paths:
               type: number
               format: integer
               example: 1
-        - name: filter[tabType]
+        - name: filter[tabTypes]
           in: query
           required: false
           description: Filters for tabs by types

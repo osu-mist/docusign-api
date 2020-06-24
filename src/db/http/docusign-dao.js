@@ -3,6 +3,8 @@ import config from 'config';
 import rp from 'request-promise-native';
 
 import { serializeTabs } from 'serializers/docusign-serializer';
+import { parseQuery } from 'utils/parse-query';
+import { paramsLink } from 'utils/uri-builder';
 import { httpOptions } from './connection';
 
 const { baseUri } = config.get('dataSources.http');
@@ -16,13 +18,17 @@ const { baseUri } = config.get('dataSources.http');
  */
 const getEnvelopeDocumentTabs = async (params, query) => {
   const { envelopeId, documentId } = params;
+  const { pageNumbers } = parseQuery(query);
 
   let rawTabs;
   try {
-    rawTabs = await rp.get({
-      ...{ uri: `${baseUri}/envelopes/${envelopeId}/documents/${documentId}/tabs` },
-      ...httpOptions,
-    });
+    let uri = `${baseUri}/envelopes/${envelopeId}/documents/${documentId}/tabs`;
+
+    if (pageNumbers) {
+      uri = paramsLink(uri, { page_numbers: pageNumbers.join(',') });
+    }
+
+    rawTabs = await rp.get({ ...{ uri }, ...httpOptions });
     return serializeTabs(rawTabs, params, query);
   } catch (err) {
     const { statusCode } = err;
