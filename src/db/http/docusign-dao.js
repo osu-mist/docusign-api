@@ -1,5 +1,5 @@
-import createError from 'http-errors';
 import config from 'config';
+import createError from 'http-errors';
 import rp from 'request-promise-native';
 
 import { serializeTabs } from 'serializers/docusign-serializer';
