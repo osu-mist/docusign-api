@@ -371,6 +371,68 @@ components:
                     The maximum number of tabs within the `tabGroup` that should be checked,
                     populated, or signed. This property is used for validation.
                   example: 1
+            conditionalParent:
+              type: object
+              nullable: true
+              properties:
+                label:
+                  type: string
+                  description: The label of the parent tab that controls this tab's visibility.
+                  example: Radio Group 0000-aaaa-1234567
+                value:
+                  type: string
+                  description: >-
+                    The value of the parent tab that controls the tab's visibility. If the parent
+                    tab is a Checkbox, Radio button, Optional Signature, or Optional Initial use
+                    `on` as the value to show that the parent tab is active.
+                  example: Radio1
+            order:
+              type: number
+              format: integer
+              nullable: true
+              description: >-
+                A positive integer that sets the order the tab is navigated to during signing.
+              example: 0
+            listItems:
+              type: array
+              nullable: true
+              items:
+                type: object
+                properties:
+                  text:
+                    type: string
+                    description: Specifies the text that is shown in the dropdown list.
+                    example: AABC
+                  value:
+                    type: string
+                    description: Specifies the value that is used when the list item is selected.
+                    example: AABC
+                  selectedInd:
+                    type: boolean
+                    description: >-
+                      When set to true, indicates that this item is the default selection shown to
+                      a signer.
+            formula:
+              type: string
+              nullable: true
+              description: Contains the formula for calculating the value of this tab.
+              example: "[Mother Siblings] + [Father Siblings] = [Dropdown xxx-123-ABC]"
+            roundDecimalPlaces:
+              type: number
+              format: integer
+              nullable: true
+              description: The number of decimal places to round to.
+              example: 1
+            hiddenInd:
+              type: boolean
+              nullable: true
+              description: |
+                If this is a regular formula (no paymentDetails property is present):
+                  true: The tab is hidden.
+                  false: The tab is shown.
+                If the formula is payment item (a paymentDetails property is present):
+                  true: The tab is displayed as a payment.
+                  false: The tab is displayed as a regular formula.
     TabSetResult:
       properties:
         links:

@@ -101,6 +101,15 @@ const serializeTabs = (rawTabs, params, query) => {
           minimumRequired: parseInt(tab.minimumRequired, 10),
           maximumAllowed: parseInt(tab.maximumAllowed, 10),
         },
+        conditionalParent: {
+          label: tab.conditionalParentLabel,
+          value: tab.conditionalParentValue,
+        },
+        order: parseInt(tab.tabOrder, 10),
+        listItems: [],
+        formula: tab.formula,
+        roundDecimalPlaces: parseInt(tab.roundDecimalPlaces, 10),
+        hiddenInd: toBoolean(tab.hidden),
       };
 
       if (tabType === 'radioGroupTabs') {
@@ -117,6 +126,16 @@ const serializeTabs = (rawTabs, params, query) => {
             lockedInd: toBoolean(rawRadio.locked),
             requiredInd: toBoolean(rawRadio.required),
           };
+        });
+      }
+
+      if (tabType === 'listTabs') {
+        _.forEach(tab.listItems, (listItem) => {
+          flattenTab.listItems.push({
+            text: listItem.text,
+            value: listItem.value,
+            selectedInd: toBoolean(listItem.selected),
+          });
         });
       }
 
