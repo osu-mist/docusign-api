@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: Express API Skeleton
-  description: Skeleton for Express APIs
-  version: v2
+  title: DocuSign API
+  description: Wrapper API for DocuSign
+  version: v1
   license:
     name: GNU Affero General Public License Version 3
     url: http://www.gnu.org/licenses/agpl-3.0.en.html
@@ -12,106 +12,84 @@ info:
     email: isdataarchitecture@oregonstate.edu
 externalDocs:
   description: GitHub Repository
-  url: https://github.com/osu-mist/express-api-skeleton
+  url: https://github.com/osu-mist/docusign-api
 servers:
-  - url: https://api.oregonstate.edu/v2
+  - url: https://api.oregonstate.edu/v1
 security:
   - OAuth2:
       - full
 paths:
-  /pets:
+  /docusign/envelopes/{envelopeId}/documents/{documentId}/tabs:
     get:
-      summary: List all pets
+      summary: Returns the tabs on a document
       tags:
-        - pets
-      description: Get all pets
-      operationId: getPets
+        - tabs
+      description: Returns the tabs on a document.
+      operationId: getEnvelopeDocumentTabs
       parameters:
-        - $ref: '#/components/parameters/pageNumber'
-        - $ref: '#/components/parameters/pageSize'
-        - in: query
-          name: filter[species]
-          description: Search by pet species
+        - $ref: '#/components/parameters/envelopeId'
+        - $ref: '#/components/parameters/documentId'
+        - name: filter[pageNumbers]
+          in: query
           required: false
+          description: Filters for tabs that occur on the specified page number
           schema:
-            type: string
-        - in: query
-          name: filter[hasOwner]
-          description: Filter results if pet has an owner or not
+            type: array
+            items:
+              type: number
+              format: integer
+              example: 1
+        - name: filter[tabTypes]
+          in: query
           required: false
+          description: Filters for tabs by types
           schema:
-            type: boolean
-        - in: query
-          name: filter[age][gt]
-          description: Filter results by age
-          required: false
-          schema:
-            type: number
-            format: integer
-        - in: query
-          name: filter[age][lt]
-          description: Filter results by age
-          required: false
-          schema:
-            type: number
-            format: integer
+            type: array
+            items:
+              type: string
+              enum: &tabTypeEnums
+                - approve
+                - checkbox
+                - commentThread
+                - company
+                - dateSigned
+                - date
+                - decline
+                - draw
+                - emailAddress
+                - email
+                - envelopeId
+                - firstName
+                - formula
+                - fullName
+                - initialHere
+                - lastName
+                - list
+                - notarize
+                - note
+                - number
+                - polyLineOverlay
+                - radioGroup
+                - signerAttachment
+                - signHere
+                - smartSection
+                - ssn
+                - tabGroups
+                - text
+                - title
+                - view
+                - zip
+          style: form
+          explode: false
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PetSetResult'
+                $ref: '#/components/schemas/TabSetResult'
         '400':
           $ref: '#/components/responses/400'
-        '500':
-          $ref: '#/components/responses/500'
-    post:
-      summary: Add a new pet
-      tags:
-        - pets
-      operationId: postPet
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PetPostBody'
-      responses:
-        '201':
-          description: Pet successfully created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PetResult'
-        '400':
-          $ref: '#/components/responses/400'
-        '409':
-          $ref: '#/components/responses/409'
-        '500':
-          $ref: '#/components/responses/500'
-  /pets/{id}:
-    get:
-      summary: Info for a specific pet
-      tags:
-        - pets
-      description: Get pet by unique ID
-      operationId: getPetById
-      parameters:
-        - name: id
-          in: path
-          description: Unique Pet ID
-          required: true
-          schema:
-            type: string
-            pattern: '^[A-Za-z0-9-]+$'
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PetResult'
         '404':
           $ref: '#/components/responses/404'
         '500':
@@ -126,25 +104,22 @@ components:
           scopes:
             full: Full access to the API
   parameters:
-    pageNumber:
-      name: page[number]
-      in: query
-      required: false
-      description: Page number of results
+    envelopeId:
+      name: envelopeId
+      in: path
+      description: Unique envelope ID
+      required: true
       schema:
-        type: integer
-        minimum: 1
-        default: 1
-    pageSize:
-      name: page[size]
-      in: query
-      required: false
-      description: Number of results to return
+        type: string
+        example: 0000-aaaa-1234567
+    documentId:
+      name: documentId
+      in: path
+      description: Unique document ID
+      required: true
       schema:
-        type: integer
-        minimum: 1
-        maximum: 500
-        default: 25
+        type: string
+        example: ABCD
   responses:
     '400':
       description: Bad request
@@ -158,12 +133,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResult'
-    '409':
-      description: Conflict
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResult'
     '500':
       description: Internal server error
       content:
@@ -171,149 +140,310 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResult'
   schemas:
-    Meta:
-      properties:
-        totalResults:
-          type: integer
-          description: Total number of results
-          example: 10
-        totalPages:
-          type: integer
-          description: Total number of pages
-          example: 10
-        currentPageNumber:
-          type: integer
-          description: Page number of the returned results
-          example: 1
-        currentPageSize:
-          type: integer
-          description: Number of results per page
-          example: 25
     SelfLink:
       properties:
         self:
           type: string
           format: uri
           description: Self-link of current resource
-    PaginationLinks:
-      properties:
-        first:
-          type: string
-          format: uri
-          description: The first page of data
-        last:
-          type: string
-          format: uri
-          description: The last page of data
-        prev:
-          type: string
-          format: uri
-          nullable: true
-          description: The previous page of data
-        next:
-          type: string
-          format: uri
-          nullable: true
-          description: The next page of data
-    PetResource:
+    TabResource:
       properties:
         id:
           type: string
-          description: A unique ID of pet
+          description: A unique ID of tab
+          example: abcd-0000-12345-ABCDE
         type:
           type: string
-          enum:
-            - pet
+          enum: [tab]
         links:
           $ref: '#/components/schemas/SelfLink'
         attributes:
           properties:
             name:
               type: string
-              description: Name of pet
-              example: Hedwig
-            owner:
+              description: The name of the tab
+              example: SignHere
+              nullable: false
+            label:
               type: string
-              description: Name of owner
-              example: Harry Potter
-            species:
+              description: The label associated with the tab
+              example: Signature 123456-abcd-0000-ABCDEFG
+              nullable: false
+            scope:
               type: string
-              description: Species of pet
-              example: Owl
-            age:
+              description: The scope of the tab group
+              example: Document
+              nullable: true
+            stampType:
+              type: string
+              description: The type of stamp
+              example: signature
+              nullable: true
+            tabType:
+              type: string
+              description: The type of tab
+              enum: *tabTypeEnums
+              nullable: false
+            value:
+              type: string
+              description: The value of the tab
+              example: Approve
+              nullable: true
+            originalValue:
+              type: string
+              description: The initial value of the tab when it was sent to the recipient
+              example: Approve
+              nullable: true
+            scaleValue:
+              type: number
+              format: float
+              description: Scale value of the tab
+              example: 1.2
+              nullable: true
+            pageNumber:
               type: number
               format: integer
-              description: Age of pet
-              example: 5
+              description: The page number that this tab occurs
+              example: 1
+              nullable: false
+            optionalInd:
+              type: boolean
+              description: Identifies whether the tab is optional
+              nullable: true
+            recipientId:
+              type: string
+              description: Unique ID of the recipient
+              example: xyz-123-OPQRSTU
+              nullable: false
+            position:
+              type: object
+              nullable: false
+              properties:
+                x:
+                  type: number
+                  format: integer
+                  description: The horizontal offset of the tab on the page
+                  example: 100
+                y:
+                  type: number
+                  format: integer
+                  description: The vertical offset of the tab on the page
+                  example: 200
+            templateRecipient:
+              type: object
+              nullable: true
+              properties:
+                lockedInd:
+                  type: boolean
+                  description: >-
+                    When set to true, the sender cannot change any attributes of the recipient
+                requiredInd:
+                  type: boolean
+                  description: When set to true, the sender may not remove the recipient
+            signer:
+              type: object
+              nullable: true
+              properties:
+                lockedInd:
+                  type: boolean
+                  description: When set to true, the signer cannot change the data of the custom tab
+                requiredInd:
+                  type: boolean
+                  description: When set to true, the signer is required to fill out this tab
+            shared:
+              type: object
+              nullable: true
+              properties:
+                sharedInd:
+                  type: boolean
+                  description: When set to true, this custom tab is shared
+                  nullable: true
+                requireAllInd:
+                  type: boolean
+                  description: >-
+                    When set to true and `sharedInd` is true, information must be entered to
+                    complete the envelope.
+                requireInitialOnSharedChangeInd:
+                  type: boolean
+                  description: >-
+                    When set to true, the signer is required to initial when they modify a
+                    shared field
+            font:
+              type: object
+              nullable: true
+              properties:
+                family:
+                  type: string
+                  description: The font to be used for the tab value
+                  example: lucidaconsole
+                size:
+                  type: string
+                  description: The font size used for the information in the tab
+                  example: size10
+                color:
+                  type: string
+                  description: The font color to use for the information in the tab
+                  example: black
             size:
               type: object
+              nullable: true
               properties:
-                length:
+                height:
                   type: number
-                  format: float
-                  description: Length in inches
-                  example: 18
-                chest:
+                  format: integer
+                  description: The height of the tab in pixels
+                  example: 11
+                width:
                   type: number
-                  format: float
-                  description: Chest size in inches
-                  example: 16
-                weight:
+                  format: integer
+                  description: The width of the tab in pixels
+                  example: 42
+                maxLength:
                   type: number
-                  format: float
-                  description: Weight in pounds
-                  example: 8
-    PetPostBody:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            type:
-              $ref: '#/components/schemas/PetResource/properties/type'
-            attributes:
+                  format: integer
+                  description: >-
+                    Describes the maximum length of the property when the property is a string
+                  example: 4000
+            validation:
               type: object
+              nullable: true
+              properties:
+                pattern:
+                  type: string
+                  description: A regular expression used to validate input for the tab
+                  example: "^\\d{9}$"
+                message:
+                  type: string
+                  description: The message displayed if the custom tab fails input validation
+                  example: Validation failed
+            concealValueOnDocumentInd:
+              type: boolean
+              nullable: true
+              description: >-
+                When set to true, the field appears normally while the recipient is adding or
+                modifying the information in the field, but the data is not visible (the characters
+                are hidden by asterisks) to any other signer or the sender
+            disableAutoSizeInd:
+              type: boolean
+              nullable: true
+              description: >-
+                When set to true, disables the auto sizing of single line text boxes in the signing
+                screen when the signer enters data. If disabled users will only be able enter as
+                much data as the text box can hold.
+            selectedInd:
+              type: boolean
+              nullable: true
+              description: >-
+                An Optional attribute for checkbox type tab. When true, the checkbox is selected
+            tabGroupLabels:
+              type: array
+              nullable: true
+              description: An array of tab group labels that uniquely identify tab groups
+              items:
+                type: string
+                example: Checkbox Group 0000-aaaa-1234567
+            group:
+              type: object
+              nullable: true
               properties:
                 name:
-                  $ref: '#/components/schemas/PetResource/properties/attributes/properties/name'
-                owner:
-                  $ref: '#/components/schemas/PetResource/properties/attributes/properties/owner'
-                species:
-                  $ref: '#/components/schemas/PetResource/properties/attributes/properties/species'
-                age:
-                  $ref: '#/components/schemas/PetResource/properties/attributes/properties/age'
-                size:
-                  $ref: '#/components/schemas/PetResource/properties/attributes/properties/size'
-              required:
-                - name
-                - owner
-                - species
-              additionalProperties: false
-          required:
-            - type
-            - attributes
-          additionalProperties: false
-      required:
-       - data
-      additionalProperties: false
-    PetResult:
-      properties:
-        links:
-          $ref: '#/components/schemas/SelfLink'
-        data:
-          $ref: '#/components/schemas/PetResource'
-    PetSetResult:
+                  type: string
+                  description: The name of the group
+                  example: Radio Group 0000-aaaa-1234567
+                label:
+                  type: string
+                  description: A unique identifier for a tab group
+                  example: Checkbox Group 0000-aaaa-1234567
+                rule:
+                  type: string
+                  description: >-
+                    Specifies how `maximumAllowed` and `minimumRequired` are interpreted when
+                    selecting tabs in a `tabGroup`
+                minimumRequired:
+                  type: number
+                  format: integer
+                  description: >-
+                    The minimum number of tabs within the `tabGroup` that should be checked,
+                    populated, or signed. This property is used for validation.
+                  example: 0
+                maximumAllowed:
+                  type: number
+                  format: integer
+                  description: >-
+                    The maximum number of tabs within the `tabGroup` that should be checked,
+                    populated, or signed. This property is used for validation.
+                  example: 1
+            conditionalParent:
+              type: object
+              nullable: true
+              properties:
+                label:
+                  type: string
+                  description: The label of the parent tab that controls this tab's visibility.
+                  example: Radio Group 0000-aaaa-1234567
+                value:
+                  type: string
+                  description: >-
+                    The value of the parent tab that controls the tab's visibility. If the parent
+                    tab is a Checkbox, Radio button, Optional Signature, or Optional Initial use
+                    `on` as the value to show that the parent tab is active.
+                  example: Radio1
+            order:
+              type: number
+              format: integer
+              nullable: true
+              description: >-
+                A positive integer that sets the order the tab is navigated to during signing.
+              example: 0
+            listItems:
+              type: array
+              nullable: true
+              items:
+                type: object
+                properties:
+                  text:
+                    type: string
+                    description: Specifies the text that is shown in the dropdown list.
+                    example: AABC
+                  value:
+                    type: string
+                    description: Specifies the value that is used when the list item is selected.
+                    example: AABC
+                  selectedInd:
+                    type: boolean
+                    description: >-
+                      When set to true, indicates that this item is the default selection shown to
+                      a signer.
+            formula:
+              type: string
+              nullable: true
+              description: Contains the formula for calculating the value of this tab.
+              example: "[Mother Siblings] + [Father Siblings] = [Dropdown xxx-123-ABC]"
+            roundDecimalPlaces:
+              type: number
+              format: integer
+              nullable: true
+              description: The number of decimal places to round to.
+              example: 1
+            hiddenInd:
+              type: boolean
+              nullable: true
+              description: |
+                If this is a regular formula (no paymentDetails property is present):
+                  true: The tab is hidden.
+                  false: The tab is shown.
+                If the formula is payment item (a paymentDetails property is present):
+                  true: The tab is displayed as a payment.
+                  false: The tab is displayed as a regular formula.
+    TabSetResult:
       properties:
         links:
           allOf:
             - $ref: '#/components/schemas/SelfLink'
-            - $ref: '#/components/schemas/PaginationLinks'
-        meta:
-          $ref: '#/components/schemas/Meta'
         data:
           type: array
           items:
-            $ref: '#/components/schemas/PetResource'
+            $ref: '#/components/schemas/TabResource'
     ErrorObject:
       properties:
         status:
