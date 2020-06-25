@@ -1,4 +1,4 @@
-import chai, { assert } from 'chai';
+import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import config from 'config';
 import _ from 'lodash';
@@ -18,18 +18,19 @@ describe('Test http connection module', () => {
   let configGetStub;
   let rpGetStub;
   let connection;
+  let validateHttp;
 
   beforeEach(() => {
     configGetStub = sinon.stub(config, 'get')
       .withArgs('dataSources.http')
       .returns({});
-    rpGetStub = sinon.stub(rp, 'get');
   });
   afterEach(() => sinon.restore());
 
   const createHttpConnectionStub = () => {
     connection = proxyquire('db/http/connection', {
       config: { get: configGetStub },
+      rp: { get: rpGetStub },
       // suppress logger output for testing
       '../../utils/logger': { logger: { error: () => {} } },
     });
@@ -38,27 +39,30 @@ describe('Test http connection module', () => {
   const testCases = [
     {
       description: 'Should resolve when rp.get resolves',
-      rpGetStubReturns: Promise.resolve({}),
+      expectedResult: undefined,
     },
     {
-      description: 'Should throw error when rp.get reject',
-      rpGetStubReturns: Promise.reject(new Error('fake error')).catch(() => {}),
+      description: 'Should throw error when rp.get throw an error',
+      expectedResult: new Error('Unable to connect to HTTP data source'),
+      errorThrown: new Error('fake error'),
     },
   ];
 
-  describe('validateHttp', () => {
-    _.forEach(testCases, ({ description, rpGetStubReturns }) => {
+  describe('validate http data source', () => {
+    _.forEach(testCases, ({ description, expectedResult, errorThrown }) => {
       it(description, async () => {
-        createHttpConnectionStub();
-        rpGetStub.returns(rpGetStubReturns);
-        try {
-          const result = await connection.validateHttp();
-          assert.isUndefined(result);
-        } catch (err) {
-          assert.typeOf(err, 'error');
-        } finally {
+        if (errorThrown) {
+          rpGetStub = sinon.stub(rp, 'get').rejects(new Error('fake error'));
+          createHttpConnectionStub();
+          validateHttp = connection.validateHttp();
           rpGetStub.should.have.been.calledOnce;
+          return validateHttp.should.be.rejectedWith('Unable to connect to HTTP data source');
         }
+        rpGetStub = sinon.stub(rp, 'get').resolves({});
+        createHttpConnectionStub();
+        validateHttp = connection.validateHttp();
+        rpGetStub.should.have.been.calledOnce;
+        return validateHttp.should.eventually.equal(expectedResult);
       });
     });
   });
