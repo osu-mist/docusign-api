@@ -43,7 +43,7 @@ describe('Test http connection module', () => {
     },
     {
       description: 'Should throw error when rp.get throw an error',
-      expectedResult: new Error('Unable to connect to HTTP data source'),
+      expectedResult: 'Unable to connect to HTTP data source',
       errorThrown: new Error('fake error'),
     },
   ];
@@ -52,11 +52,11 @@ describe('Test http connection module', () => {
     _.forEach(testCases, ({ description, expectedResult, errorThrown }) => {
       it(description, async () => {
         if (errorThrown) {
-          rpGetStub = sinon.stub(rp, 'get').rejects(new Error('fake error'));
+          rpGetStub = sinon.stub(rp, 'get').rejects(errorThrown);
           createHttpConnectionStub();
           validateHttp = connection.validateHttp();
           rpGetStub.should.have.been.calledOnce;
-          return validateHttp.should.be.rejectedWith('Unable to connect to HTTP data source');
+          return validateHttp.should.be.rejectedWith(expectedResult);
         }
         rpGetStub = sinon.stub(rp, 'get').resolves({});
         createHttpConnectionStub();
