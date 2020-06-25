@@ -1,11 +1,12 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import config from 'config';
 import _ from 'lodash';
 import proxyquireModule from 'proxyquire';
 import rp from 'request-promise-native';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+
+import { createConfigStub } from './test-helpers';
 
 chai.should();
 chai.use(chaiAsPromised);
@@ -15,22 +16,15 @@ chai.use(sinonChai);
 const proxyquire = proxyquireModule.noCallThru();
 
 describe('Test docusign-dao', () => {
-  let configGetStub;
   let rpGetStub;
   let docusignDao;
 
-  beforeEach(() => {
-    configGetStub = sinon.stub(config, 'get')
-      .withArgs('dataSources.http')
-      .returns({ baseUri: 'https://fakeUri.com' });
-  });
   afterEach(() => sinon.restore());
 
   const getEnvelopeDocumentTabsStub = () => {
+    createConfigStub();
     docusignDao = proxyquire('db/http/docusign-dao', {
-      config: { get: configGetStub },
       rp: { get: rpGetStub },
-      '../../utils/uri-builder': { paramsLink: {} },
     });
   };
 

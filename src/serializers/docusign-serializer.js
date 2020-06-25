@@ -172,10 +172,13 @@ const serializeTabs = (rawTabs, params, query) => {
     enableDataLinks: false,
   };
 
-  return new JsonApiSerializer(
+  const result = new JsonApiSerializer(
     tabResourceType,
     serializerOptions(serializerArgs),
   ).serialize(flattenTabs);
+  // console.log(result);
+
+  return result;
 };
 
 export { serializeTabs };

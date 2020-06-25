@@ -1,11 +1,12 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import config from 'config';
 import _ from 'lodash';
 import proxyquireModule from 'proxyquire';
 import rp from 'request-promise-native';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+
+import { createConfigStub } from './test-helpers';
 
 chai.should();
 chai.use(chaiAsPromised);
@@ -15,21 +16,15 @@ chai.use(sinonChai);
 const proxyquire = proxyquireModule.noCallThru();
 
 describe('Test http connection module', () => {
-  let configGetStub;
   let rpGetStub;
   let connection;
   let validateHttp;
 
-  beforeEach(() => {
-    configGetStub = sinon.stub(config, 'get')
-      .withArgs('dataSources.http')
-      .returns({});
-  });
   afterEach(() => sinon.restore());
 
   const createHttpConnectionStub = () => {
+    createConfigStub();
     connection = proxyquire('db/http/connection', {
-      config: { get: configGetStub },
       rp: { get: rpGetStub },
       // suppress logger output for testing
       '../../utils/logger': { logger: { error: () => {} } },
