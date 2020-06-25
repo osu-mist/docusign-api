@@ -25,7 +25,11 @@ const getEnvelopeDocumentTabs = async (params, query) => {
     if (pageNumbers) {
       uri = paramsLink(uri, { page_numbers: pageNumbers.join(',') });
     }
-    return await rp.get({ ...{ uri }, ...httpOptions });
+    const result = await rp.get({ ...{ uri }, ...httpOptions });
+    if (result instanceof Error) {
+      throw result;
+    }
+    return result;
   } catch (err) {
     const { statusCode } = err;
     if (statusCode === 400) {
