@@ -22,8 +22,6 @@ describe('Test docusign-serializer', () => {
    *
    * @param {string} schema the name of schema
    * @param {object} nestedOption nested option
-   * @param {boolean} nestedOption.dataItem a boolean which represents whether it's a data item
-   * @param {string} nestedOption.dataField data field name
    * @returns {object} the result of definition
    */
   const getComponentSchemaProps = (schema, nestedOption) => {
