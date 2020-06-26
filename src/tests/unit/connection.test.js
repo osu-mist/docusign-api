@@ -2,79 +2,62 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import _ from 'lodash';
 import proxyquireModule from 'proxyquire';
+import rp from 'request-promise-native';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
-// Prevent call thru to original dependencies
-const proxyquire = proxyquireModule.noCallThru();
+import { createConfigStub } from './test-helpers';
 
 chai.should();
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
-describe('Test oracledb connection module', () => {
-  let connection;
+// Prevent call thru to original dependencies
+const proxyquire = proxyquireModule.noCallThru();
 
-  const configGetStub = sinon.stub()
-    .withArgs('dataSources.oracledb')
-    .returns({});
+describe('Test http connection module', () => {
+  let rpGetStub;
+  let connection;
+  let validateHttp;
 
   afterEach(() => sinon.restore());
 
-  const createOracleDbStub = (createPoolStub) => {
-    connection = proxyquire('db/oracledb/connection', {
-      config: { get: configGetStub },
-      oracledb: { createPool: createPoolStub },
+  const createHttpConnectionStub = () => {
+    createConfigStub();
+    connection = proxyquire('db/http/connection', {
+      rp: { get: rpGetStub },
       // suppress logger output for testing
       '../../utils/logger': { logger: { error: () => {} } },
     });
   };
 
-  describe('getConnection', () => {
-    it('Should call createPool if pool is falsy. Should not call createPool additional times', async () => {
-      const createPoolStub = sinon.stub()
-        .resolves({ getConnection: async () => 'test-connection' });
-      createOracleDbStub(createPoolStub);
-
-      /*
-       * These cases are not in a loop since a for-loop would be required. Lodash functions wouldn't
-       * work due to the need to run each async function in sequence.
-       */
-      const firstResult = connection.getConnection();
-      await firstResult.should.eventually.be.fulfilled.and.deep.equal('test-connection');
-      const secondResult = connection.getConnection();
-      await secondResult.should.eventually.be.fulfilled.and.deep.equal('test-connection');
-      createPoolStub.should.have.been.calledOnce.and.always.calledWithMatch({});
-      createPoolStub.should.have.been.calledWithMatch({});
-    });
-  });
-
   const testCases = [
     {
-      description: 'Should resolve when connection.execute resolves',
-      getExecuteStub: () => sinon.stub().resolves(),
-      testResult: (result) => result.should.eventually.be.fulfilled,
+      description: 'Should resolve when rp.get resolves',
+      expectedResult: undefined,
     },
     {
-      description: 'Should reject when connection.execute rejects',
-      getExecuteStub: () => sinon.stub().rejects(),
-      testResult: (result) => result.should.be.rejected,
+      description: 'Should throw error when rp.get throw an error',
+      expectedResult: 'Unable to connect to HTTP data source',
+      errorThrown: new Error('fake error'),
     },
   ];
 
-  describe('validateOracleDb', () => {
-    _.forEach(testCases, ({ description, getExecuteStub, testResult }) => {
+  describe('validate http data source', () => {
+    _.forEach(testCases, ({ description, expectedResult, errorThrown }) => {
       it(description, async () => {
-        const executeStub = getExecuteStub();
-        const closeStub = sinon.stub().resolves();
-        const createPoolStub = sinon.stub()
-          .resolves({ getConnection: async () => ({ execute: executeStub, close: closeStub }) });
-        createOracleDbStub(createPoolStub);
-        const result = connection.validateOracleDb();
-        await testResult(result);
-        createPoolStub.should.have.been.calledOnce;
-        executeStub.should.have.been.calledOnce;
-        closeStub.should.have.been.calledOnce;
+        if (errorThrown) {
+          rpGetStub = sinon.stub(rp, 'get').rejects(errorThrown);
+          createHttpConnectionStub();
+          validateHttp = connection.validateHttp();
+          rpGetStub.should.have.been.calledOnce;
+          return validateHttp.should.be.rejectedWith(expectedResult);
+        }
+        rpGetStub = sinon.stub(rp, 'get').resolves({});
+        createHttpConnectionStub();
+        validateHttp = connection.validateHttp();
+        rpGetStub.should.have.been.calledOnce;
+        return validateHttp.should.eventually.equal(expectedResult);
       });
     });
   });
