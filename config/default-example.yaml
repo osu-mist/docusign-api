@@ -13,7 +13,7 @@ authentication:
   password: ${PASSWD}
 
 dataSources:
-  dataSources: [http']
+  dataSources: ['http']
   http:
     baseUri: ${DOCUSIGN_API_BASEURI}
     username: ${DOCUSIGN_USERNAME}
